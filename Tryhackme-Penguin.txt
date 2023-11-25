@@ -1,0 +1,16 @@
+{
+  "ssh_weak_ciphers": "THM{9ff9c182cad601291d45951c01d0b2c7}",
+  "ssh_weak_kex": "THM{d9baf598ee934d79346f425a81bd693a}",
+  "ssh_weak_macs": "THM{e3d6b82f291b64f95213583dcd89b659}",
+  "redis_nopass": "THM{ae4e5bb7aac2c2252363ca466f10ffd0}",
+  "redis_port_public": "THM{20a809866dbcf94109189c5bafabc5c2}",
+  "mysql_port_public": "THM{526e33142b54e13bb47b17056823ab60}",
+  "snmp_public": "THM{aa397a808d527fd71f023c78d3c04591}",
+  "nginx_asroot": "THM{bebb02b22bb56b2f79ba706975714ee2}",
+  "unused_accounts": "THM{1b354db0e71f75057abe69de26a637ab}",
+  "change_pass": "THM{be74a521c3982298d2e9b0e347a3807d}",
+  "sudoers_mary": "THM{a0bcb9b72fd26d0ad55cdcdcd21698f1}",
+  "sudoers_munra": "THM{1e9ee13fb42fea2a9eb2730c51448241}",
+  "cleartext_services": "THM{33704d74ec53c8cf50daf817bea836a1}",
+  "anon_ftp": "THM{f20b5ff5a3d4c779e99c3a93d1f68c6d}"
+}
