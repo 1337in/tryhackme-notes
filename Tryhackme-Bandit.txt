@@ -1,0 +1,7 @@
+Bandit
+
+safeadmin
+HardcodedMeansUnguessableRight
+
+safeuserHelpDesk
+Passw0rd
